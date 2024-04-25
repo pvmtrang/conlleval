@@ -134,7 +134,7 @@ def count_chunks(true_seqs, pred_seqs):
             true_end = is_chunk_end(prev_true_tag, true_tag)
             pred_end = is_chunk_end(prev_pred_tag, pred_tag)
 
-            if pred_end and true_end:
+            if pred_end and true_end and true_type == pred_type:
                 correct_chunks[correct_chunk] += 1
                 correct_chunk = None
             elif pred_end != true_end or true_type != pred_type:
