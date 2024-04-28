@@ -177,8 +177,8 @@ def get_result(correct_chunks, true_chunks, pred_chunks,
     chunk_types = sorted(list(set(list(true_chunks) + list(pred_chunks))))
 
     # compute overall precision, recall and FB1 (default values are 0.0)
-    prec, rec, f1 = calc_metrics(sum_correct_chunks, sum_pred_chunks, sum_true_chunks)
-    res = (prec, rec, f1)
+    prec, rec, f1_micro = calc_metrics(sum_correct_chunks, sum_pred_chunks, sum_true_chunks)
+    res = (prec, rec, f1_micro)
     if not verbose:
         return res
 
@@ -186,10 +186,8 @@ def get_result(correct_chunks, true_chunks, pred_chunks,
     
     print("processed %i tokens with %i phrases; " % (sum_true_counts, sum_true_chunks), end='')
     print("found: %i phrases; correct: %i.\n" % (sum_pred_chunks, sum_correct_chunks), end='')
-        
-    print("accuracy: %6.2f%%; (non-O)" % (100*nonO_correct_counts/nonO_true_counts))
-    print("accuracy: %6.2f%%; " % (100*sum_correct_counts/sum_true_counts), end='')
-    print("precision: %6.2f%%; recall: %6.2f%%; FB1: %6.2f" % (prec, rec, f1))
+
+    f1_macro = 0.0
 
     # for each chunk type, compute precision, recall and FB1 (default values are 0.0)
     for t in chunk_types:
@@ -197,7 +195,15 @@ def get_result(correct_chunks, true_chunks, pred_chunks,
         print("%17s: " %t , end='')
         print("precision: %6.2f%%; recall: %6.2f%%; FB1: %6.2f" %
                     (prec, rec, f1), end='')
-        print("  %d" % pred_chunks[t])
+        print("  %d/%d" % (pred_chunks[t], true_chunks[t]))
+        f1_macro += f1
+
+    f1_macro /= len(chunk_types)
+
+    print("token accuracy(non-O): %6.2f%%; " % (100*nonO_correct_counts/nonO_true_counts))
+    print("token accuracy: %6.2f%%; " % (100*sum_correct_counts/sum_true_counts), end = ' ') #accuracy based on token
+    print("precision: %6.2f%%; recall: %6.2f%%;" % (prec, rec))
+    print("F1_micro: %6.2f; F1_macro: %6.2f" % (f1_micro, f1_macro))
 
     return res
     # you can generate LaTeX output for tables like in
